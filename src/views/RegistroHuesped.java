@@ -7,6 +7,9 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.JTextField;
 import java.awt.Color;
 import com.toedter.calendar.JDateChooser;
+
+import controller.BoarderController;
+import model.Boarders;
 import javax.swing.JComboBox;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JLabel;
@@ -19,7 +22,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.sql.Date;
 import java.text.Format;
+import java.text.SimpleDateFormat;
 import java.awt.event.ActionEvent;
 import java.awt.Toolkit;
 import javax.swing.SwingConstants;
@@ -29,15 +34,17 @@ import javax.swing.JSeparator;
 public class RegistroHuesped extends JFrame {
 
 	private JPanel contentPane;
-	private JTextField txtNombre;
-	private JTextField txtApellido;
-	private JTextField txtTelefono;
-	private JTextField txtNreserva;
-	private JDateChooser txtFechaN;
-	private JComboBox<Format> txtNacionalidad;
+	public static JTextField txtNombre;
+	public static JTextField txtApellido;
+	public static JTextField txtTelefono;
+	public static JTextField txtNreserva;
+	public static JDateChooser txtFechaN;
+	public static JComboBox<Format> txtNacionalidad;
 	private JLabel labelExit;
 	private JLabel labelAtras;
 	int xMouse, yMouse;
+	private Boarders boarder;
+	private MenuUsuario menuUsuario;
 
 	/**
 	 * Launch the application.
@@ -210,6 +217,8 @@ public class RegistroHuesped extends JFrame {
 		txtNreserva.setColumns(10);
 		txtNreserva.setBackground(Color.WHITE);
 		txtNreserva.setBorder(javax.swing.BorderFactory.createEmptyBorder());
+		txtNreserva.setEnabled(false);
+		//txtNreserva.setEditable(false);
 		contentPane.add(txtNreserva);
 		
 		JSeparator separator_1_2 = new JSeparator();
@@ -253,6 +262,14 @@ public class RegistroHuesped extends JFrame {
 		btnguardar.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
+				if (create()) {
+					menuUsuario = new MenuUsuario();
+					JOptionPane.showMessageDialog(null, "Se ha completado el registro y recuerde que su numero de reserva es: " + txtNreserva.getText());
+					menuUsuario.setVisible(true);
+					dispose();
+				} else {
+					JOptionPane.showMessageDialog(null, "Algo ha pasado con el registro");
+				}
 			}
 		});
 		btnguardar.setLayout(null);
@@ -284,8 +301,6 @@ public class RegistroHuesped extends JFrame {
 		logo.setIcon(new ImageIcon(RegistroHuesped.class.getResource("/imagenes/Ha-100px.png")));
 		
 		JPanel btnexit = new JPanel();
-		btnexit.setBounds(857, 0, 53, 36);
-		contentPane.add(btnexit);
 		btnexit.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -306,26 +321,42 @@ public class RegistroHuesped extends JFrame {
 		});
 		btnexit.setLayout(null);
 		btnexit.setBackground(Color.white);
+		btnexit.setBounds(857, 0, 53, 36);
+		contentPane.add(btnexit);
+		header.add(btnexit);
 		
 		labelExit = new JLabel("X");
+		labelExit.setForeground(SystemColor.black);
 		labelExit.setBounds(0, 0, 53, 36);
 		btnexit.add(labelExit);
 		labelExit.setHorizontalAlignment(SwingConstants.CENTER);
-		labelExit.setForeground(SystemColor.black);
 		labelExit.setFont(new Font("Roboto", Font.PLAIN, 18));
 	}
 	
 	
 	//Código que permite mover la ventana por la pantalla según la posición de "x" y "y"	
-	 private void headerMousePressed(java.awt.event.MouseEvent evt) {
+	private void headerMousePressed(java.awt.event.MouseEvent evt) {
 	        xMouse = evt.getX();
 	        yMouse = evt.getY();
-	    }
+	}
 
-	    private void headerMouseDragged(java.awt.event.MouseEvent evt) {
-	        int x = evt.getXOnScreen();
-	        int y = evt.getYOnScreen();
-	        this.setLocation(x - xMouse, y - yMouse);
-}
-											
+    private void headerMouseDragged(java.awt.event.MouseEvent evt) {
+        int x = evt.getXOnScreen();
+        int y = evt.getYOnScreen();
+        this.setLocation(x - xMouse, y - yMouse);
+    }
+    
+    public boolean create() {
+    	BoarderController boarderController = new BoarderController();
+    	boarder = new Boarders();
+    	
+    	boarder.setName(txtNombre.getText());
+    	boarder.setLastName(txtApellido.getText());
+    	boarder.setDateOfBirth(new Date(txtFechaN.getDate().getTime()));
+    	boarder.setCitizenship((String) txtNacionalidad.getSelectedItem());
+    	boarder.setPhoneNumber(txtTelefono.getText());
+    	boarder.setIdBooking(Integer.valueOf(txtNreserva.getText()));
+    	
+    	return boarderController.create(boarder);
+    }
 }

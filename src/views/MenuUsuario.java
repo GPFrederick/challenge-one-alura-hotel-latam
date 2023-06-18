@@ -158,7 +158,9 @@ public class MenuUsuario extends JFrame {
 		btnexit.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				System.exit(0);
+				Login login = new Login();
+				login.setVisible(true);
+				dispose();				
 			}
 			@Override
 			public void mouseEntered(MouseEvent e) {
